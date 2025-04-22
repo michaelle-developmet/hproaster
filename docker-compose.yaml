@@ -1,0 +1,14 @@
+services:
+  back:
+    build:
+      context: ./roasrserver
+      dockerfile: ./Dockerfile
+    ports:
+        - "5011:5011"
+
+  front:
+      build:
+        context: ./HRFB/roaster
+        dockerfile: ./Dockerfile
+      ports:
+        - "3000:3000"  

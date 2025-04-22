@@ -73,19 +73,11 @@ onMounted(() => {
   </TableHeader>
 
   <TableBody>
-    <TableRow v-for="(item, index) in roasted" :key="index">
-      <TableCell class="font-medium tbl">{{ index + 1 }}</TableCell>
-      <TableCell class="tbl">{{ item.name }}</TableCell>
-      <TableCell class="tbl">—</TableCell> <!-- Здесь вставь дату если появится -->
-      <TableCell class="tbl">{{ item.globalRoastWeight }} кг</TableCell> <!-- Здесь вставь вес если появится -->
-      <TableCell class="tbl">
-        <button class="btn">Дія</button>
-      </TableCell>
-    </TableRow>
+
   </TableBody>
 </Table>
 
-            </div>
+            </div> 
 
       </ScrollArea >
     </div>
