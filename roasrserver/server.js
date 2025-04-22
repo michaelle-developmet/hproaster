@@ -1362,7 +1362,7 @@ app.put('/api/update_role_access', authMiddleware, async (req, res) => {
 
 
 // Запуск сервера
-app.listen(port, () => {
+app.listen(5011 , '0.0.0.0', () => {
     console.log(`Server is running on port ${port}`);
 });
 
