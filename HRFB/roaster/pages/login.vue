@@ -17,7 +17,7 @@ const password = ref('')
 // Функция для отправки данных на сервер
 const loginUser = async () => {
   try {
-    const response = await axios.post('http://localhost:5011/login', {
+    const response = await axios.post('http://3.70.45.39:5011/login', {
       post: post.value,  // Используем post вместо email
       password: password.value,
     }, {
