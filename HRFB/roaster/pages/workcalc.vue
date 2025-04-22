@@ -120,7 +120,7 @@ const assignTask = async () => {
     const currentUser = datas.value.user.name
 
     await axios.post(
-      'http://localhost:5011/api/assign_task',
+      'http://3.70.45.39:5011/api/assign_task',
       {
         ...taskForm.value,
         from: currentUser
@@ -173,7 +173,7 @@ const filterAppointments = (mode: 'my' | 'issued' | 'done') => {
 
 const fetchWorkers = async () => {
   try {
-    const response = await axios.get<TeamResponse>('http://localhost:5011/team', {
+    const response = await axios.get<TeamResponse>('http://3.70.45.39:5011/api/team', {
       withCredentials: true
     })
 
@@ -205,7 +205,7 @@ const markComplete = async (taskId: string) => {
     };
 
     // Отправляем запрос на сервер
-    await axios.put(`http://localhost:5011/api/tasks/complete`, payload, { withCredentials: true });
+    await axios.put(`http://3.70.45.39:5011/api/tasks/complete`, payload, { withCredentials: true });
 
     // Обновляем статус задачи на фронте
     task.status = 'complete';

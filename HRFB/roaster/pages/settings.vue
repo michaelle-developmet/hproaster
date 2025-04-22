@@ -109,7 +109,7 @@ const selectCategory = (category: string) => {
 
 const submitNewRole = async () => {
   try {
-    await axios.post('http://localhost:5011/api/add_role', {
+    await axios.post('http://3.70.45.39:5011/api/add_role', {
       role_name: newRoleName.value,
       decorative: isDecorative.value,
     }, { withCredentials: true });
@@ -128,7 +128,7 @@ const submitNewRole = async () => {
 
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://localhost:5011/team', {
+        const response = await axios.get('http://3.70.45.39:5011/api/team', {
             withCredentials: true, // Отправляем куки с запросом
         });
         user = response.data.user;
@@ -141,7 +141,7 @@ const fetchWorkers = async () => {
 const fetchAllRolses = async ()=>{
 
     try {
-        const res = await axios.get('http://localhost:5011/api/get_all_roles',{
+        const res = await axios.get('http://3.70.45.39:5011/api/get_all_roles',{
             withCredentials: true, // Отправляем куки с запросом
         });
         console.log("response",res)
@@ -157,7 +157,7 @@ const fetchAllRolses = async ()=>{
 const fetchAllStyles= async ()=>{
 
 try {
-    const res = await axios.get('http://localhost:5011/api/get_all_styles',{
+    const res = await axios.get('http://3.70.45.39:5011/api/get_all_styles',{
         withCredentials: true, // Отправляем куки с запросом
     });
     console.log("response",res)
@@ -218,7 +218,7 @@ const sendUpdatedAccess = async () => {
   };
 
   try {
-    await axios.put('http://localhost:5011/api/update_role_access', updatedAccess, {
+    await axios.put('http://3.70.45.39:5011/api/update_role_access', updatedAccess, {
       withCredentials: true,
     });
     console.log('Access updated');

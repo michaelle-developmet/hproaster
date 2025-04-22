@@ -64,7 +64,7 @@ interface User {
 let user:any = ref<User[]>
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://localhost:5011/team', {
+        const response = await axios.get('http://3.70.45.39:5011/api/team', {
             withCredentials: true, // Отправляем куки с запросом
         });
         user = response.data.user;
@@ -187,7 +187,7 @@ const submitRoastingOrder = async () => {
 
   try {
     const response = await axios.put(
-      `http://localhost:5011/lots/${selectedInvoiceForRoasting.value.lotId}/roasting`,
+      `http://3.70.45.39:5011/api/lots/${selectedInvoiceForRoasting.value.lotId}/roasting`,
       orderData,
       { withCredentials: true }
     );

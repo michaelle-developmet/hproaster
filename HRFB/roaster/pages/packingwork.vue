@@ -48,7 +48,7 @@ const stickerOptions = computed(() => user.value?.datas?.additions?.stickers || 
 // Получение данных
 const fetchRoast = async () => {
   try {
-    const { data } = await axios.get('http://localhost:5011/api/get_roasted_kava', {
+    const { data } = await axios.get('http://3.70.45.39:5011/api/get_roasted_kava', {
       withCredentials: true
     })
     roasted.value = data.user
@@ -60,7 +60,7 @@ const fetchRoast = async () => {
 
 const fetchWorkers = async () => {
   try {
-    const { data } = await axios.get('http://localhost:5011/team', {
+    const { data } = await axios.get('http://3.70.45.39:5011/api/team', {
       withCredentials: true
     })
     user.value = data.boss
@@ -135,7 +135,7 @@ const sendPackingData = async () => {
   };
 
   try {
-    const response = await axios.post('http://localhost:5011/api/submit_packing', payload, {
+    const response = await axios.post('http://3.70.45.39:5011/api/submit_packing', payload, {
       withCredentials: true,
     });
 

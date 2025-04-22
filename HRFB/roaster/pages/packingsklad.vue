@@ -11,7 +11,7 @@ const user: any = ref(null)
 
 const fetchPacksCoffee = async () => {
   try {
-    const { data } = await axios.get('http://localhost:5011/api/get_packs_coffee', {
+    const { data } = await axios.get('http://3.70.45.39:5011/api/get_packs_coffee', {
       withCredentials: true
     })
     user.value = data

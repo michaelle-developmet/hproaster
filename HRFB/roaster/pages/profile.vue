@@ -75,7 +75,7 @@ const workers = ref<Worker[]>([]); // Типизация массива рабо
 
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://localhost:5011/team', {
+        const response = await axios.get('http://3.70.45.39:5011/api/team', {
             withCredentials: true, // Отправляем куки с запросом
         });
         workers.value = response.data.workers; // Убедитесь, что сервер возвращает массив объектов с name и post
@@ -125,7 +125,7 @@ onMounted(() => {
 const fetchUserAccess = async (workerPost: string) => {
   try {
     const response = await axios.post(
-      'http://localhost:5011/user/access',
+      'http://3.70.45.39:5011/api/user/access',
       { post: workerPost },
       { withCredentials: true }
     );
@@ -139,7 +139,7 @@ const fetchUserAccess = async (workerPost: string) => {
 const updateUserAccess = async (workerPost: string) => {
   try {
     await axios.post(
-      'http://localhost:5011/user/update-access',
+      'http://3.70.45.39:5011/api/user/update-access',
       { post: workerPost, updatedAccess: currentUserAccess.value },
       { withCredentials: true }
     );

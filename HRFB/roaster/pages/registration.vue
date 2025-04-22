@@ -38,7 +38,7 @@ const handleRegister = async () => {
     }
 
     const response = await axios.post(
-      'http://localhost:5011/register',
+      'http://3.70.45.39:5011/api/register',
       requestData,
       {
         withCredentials: true, // Отправка cookies с запросом

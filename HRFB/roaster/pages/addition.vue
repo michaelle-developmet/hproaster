@@ -109,7 +109,7 @@ const stickerDialog = (stickerId: string) => {
 
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://localhost:5011/team', {
+        const response = await axios.get('http://3.70.45.39:5011/api/team', {
             withCredentials: true, // Отправляем куки с запросом
         });
         user = response.data.user;
@@ -181,7 +181,7 @@ const submitPack = async () => {
 
 
   try {
-    const res = await axios.post('http://localhost:5011/api/add_pack', formData, {
+    const res = await axios.post('http://3.70.45.39:5011/api/add_pack', formData, {
       withCredentials: true,
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -202,7 +202,7 @@ const submitPack = async () => {
 
 const submitPackCount = async () => {
   try {
-    await axios.post('http://localhost:5011/api/update_pack_count', {
+    await axios.post('http://3.70.45.39:5011/api/update_pack_count', {
       packId: selectedPackId.value,
       countToAdd: Number(addedCount.value),
     }, { withCredentials: true })
@@ -231,7 +231,7 @@ const submitSticker = async () => {
 
 
   try {
-    const res = await axios.post('http://localhost:5011/api/add_sticker', formData, {
+    const res = await axios.post('http://3.70.45.39:5011/api/add_sticker', formData, {
       withCredentials: true,
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -253,7 +253,7 @@ const submitSticker = async () => {
 
 const submitStickerCount = async () => {
   try {
-    await axios.post('http://localhost:5011/api/update_sticker_count', {
+    await axios.post('http://3.70.45.39:5011/api/update_sticker_count', {
       stickerId: selectedStickerId.value,
       addedStickerCount: Number(addedStickerCount.value),
     }, { withCredentials: true })
@@ -373,7 +373,7 @@ const selectCategory = (category: string) => {
 
             <div class="pack_block" v-for="pack in packs" :key="pack.packId">
 
-              <img :src="`http://localhost:5011/${pack.photo}`" alt="pack_photo" class="pack_photo" >
+              <img :src="`http://3.70.45.39:5011/${pack.photo}`" alt="pack_photo" class="pack_photo" >
 
               <span class="name_of_pack">
                 {{ pack.name }}
@@ -473,7 +473,7 @@ const selectCategory = (category: string) => {
 
             <div class="sticker_block" v-for="sticker in stickers" :key="sticker.stickerId">
 
-              <img :src="`http://localhost:5011/${sticker.photo}`" alt="pack_photo" class="sticker_photo" >
+              <img :src="`http://3.70.45.39:5011/${sticker.photo}`" alt="pack_photo" class="sticker_photo" >
 
               <span class="name_of_sticker">
                 {{ sticker.name }}

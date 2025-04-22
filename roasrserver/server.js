@@ -36,7 +36,7 @@ app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // доступ к папке /uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Маршрут для регистрации
 app.post('/api/register', async (req, res) => {
@@ -133,7 +133,7 @@ const upload = multer({ storage });
 
 
 // Маршрут для логина
-app.post('/login', async (req, res) => {
+app.post('/api//login', async (req, res) => {
     const { post, password } = req.body;  // Используем post вместо email
     const user = await User.findOne({ post });  // Поиск пользователя по полю post
     if (!user) {
@@ -206,7 +206,7 @@ app.get('/api/team', authMiddleware, async (req, res) => {
 });
 
 // Эндпоинт для получения данных о доступах пользователя
-app.post('/user/access', authMiddleware, async (req, res) => {
+app.post('/api//user/access', authMiddleware, async (req, res) => {
     const { post } = req.body;
 
     try {
@@ -230,7 +230,7 @@ app.post('/user/access', authMiddleware, async (req, res) => {
 });
 
 
-app.post('/user/update-access', authMiddleware, async (req, res) => {
+app.post('/api//user/update-access', authMiddleware, async (req, res) => {
     const { post, updatedAccess } = req.body;
     try {
         // Извлекаем почту босса из токена
@@ -414,7 +414,7 @@ app.post('/api/submit-form', authMiddleware, async (req, res) => {
   
 
 
-app.put('/lots/:lotId', authMiddleware, async (req, res) => {
+app.put('/api/lots/:lotId', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId); // Находим пользователя
     const boss = await User.findOne({ post: user.bossPost }); // Находим босса
@@ -521,7 +521,7 @@ app.put('/lots/:lotId', authMiddleware, async (req, res) => {
 });
 
 
-app.put('/lots/:lotId/roasting', authMiddleware, async (req, res) => {
+app.put('/api/lots/:lotId/roasting', authMiddleware, async (req, res) => {
   try {
     const { lotId } = req.params;
     const { volume, date, source } = req.body;

@@ -98,7 +98,7 @@ const RoastFormData = ref<{
 
 const submitForm = async () => {
   try {
-    const { data } = await axios.post('http://localhost:5011/api/submit-form', formData.value,{
+    const { data } = await axios.post('http://3.70.45.39:5011/api/submit-form', formData.value,{
         withCredentials:true
     });
     // alert('Форма успешно отправлена');
@@ -119,7 +119,7 @@ let user:any = ref<User[]>
 
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://localhost:5011/team', {
+        const response = await axios.get('http://3.70.45.39:5011/api/team', {
             withCredentials: true, // Отправляем куки с запросом
         });
         user = response.data.user;
@@ -206,7 +206,7 @@ const acceptDelivery = async (lot: any) => {
   
   try {
     // Отправляем запрос на сервер для обновления лота
-    const response = await axios.put(`http://localhost:5011/lots/${lot.lotId}`, {
+    const response = await axios.put(`http://3.70.45.39:5011/api/lots/${lot.lotId}`, {
       arrive: currentDate,
       status: 'sklad',
       roasting: false,
@@ -247,7 +247,7 @@ const submitFormRoasting = async () => {
     }
 
     // Отправляем данные на сервер
-    const { data } = await axios.post('http://localhost:5011/api/update-roasting', updatedFormData, {
+    const { data } = await axios.post('http://3.70.45.39:5011/api/update-roasting', updatedFormData, {
       withCredentials: true,
     });
 
