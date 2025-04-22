@@ -133,7 +133,7 @@ const upload = multer({ storage });
 
 
 // Маршрут для логина
-app.post('/api//login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { post, password } = req.body;  // Используем post вместо email
     const user = await User.findOne({ post });  // Поиск пользователя по полю post
     if (!user) {
