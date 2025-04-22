@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Маршрут для регистрации
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
     const { name, business_name, post, password, isWorker, bossPost } = req.body;
 
     if (!name || !post || !password) {
