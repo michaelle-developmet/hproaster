@@ -176,7 +176,7 @@ const authMiddleware = (req, res, next) => {
 
 
 
-app.get('/team', authMiddleware, async (req, res) => {
+app.get('/api/team', authMiddleware, async (req, res) => {
     try {
         // Ищем текущего пользователя
         const user = await User.findById(req.user.userId); // Мы не исключаем поля, чтобы получить все данные
