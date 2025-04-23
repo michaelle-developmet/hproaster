@@ -23,7 +23,7 @@ connectDB();
 
 // CORS настройки
 const corsOptions = {
-    origin: 'http://3.70.45.39:3000', // Указываем фронтенд-домен
+    origin: '*', // Указываем фронтенд-домен
     methods: 'GET,POST,PUT,DELETE',  // Разрешаем эти методы
     allowedHeaders: 'Content-Type,Authorization',  // Разрешаем эти заголовки
     credentials: true,
