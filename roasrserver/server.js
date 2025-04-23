@@ -23,8 +23,11 @@ connectDB();
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Разрешаем запросы с продакшн-сервера и localhost
-    if (origin === 'http://3.70.45.39:3000' || origin === 'http://localhost:3000') {
+    const allowedOrigins = [
+      'http://localhost:3000', // Локальный хост
+      'http://3.70.45.39:3000', // Ваш серверный домен
+    ];
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
