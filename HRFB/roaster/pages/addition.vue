@@ -373,7 +373,7 @@ const selectCategory = (category: string) => {
 
             <div class="pack_block" v-for="pack in packs" :key="pack.packId">
 
-              <img :src="`http://3.70.45.39:5011/${pack.photo}`" alt="pack_photo" class="pack_photo" >
+              <img :src="`http://3.70.45.39:5011/api/${pack.photo}`" alt="pack_photo" class="pack_photo" >
 
               <span class="name_of_pack">
                 {{ pack.name }}
@@ -473,7 +473,7 @@ const selectCategory = (category: string) => {
 
             <div class="sticker_block" v-for="sticker in stickers" :key="sticker.stickerId">
 
-              <img :src="`http://3.70.45.39:5011/${sticker.photo}`" alt="pack_photo" class="sticker_photo" >
+              <img :src="`http://3.70.45.39:5011/api/${sticker.photo}`" alt="pack_photo" class="sticker_photo" >
 
               <span class="name_of_sticker">
                 {{ sticker.name }}
