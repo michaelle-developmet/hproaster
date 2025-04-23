@@ -21,13 +21,20 @@ const port = process.env.PORT || 5011;
 
 connectDB();
 
-// CORS настройки
 const corsOptions = {
-    origin: '*', // Указываем фронтенд-домен
-    methods: 'GET,POST,PUT,DELETE',  // Разрешаем эти методы
-    allowedHeaders: 'Content-Type,Authorization',  // Разрешаем эти заголовки
-    credentials: true,
+  origin: (origin, callback) => {
+    // Разрешаем запросы с продакшн-сервера и localhost
+    if (origin === 'http://3.70.45.39:3000' || origin === 'http://localhost:3000') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: 'GET,POST,PUT,DELETE',
+  allowedHeaders: 'Content-Type,Authorization',
+  credentials: true,
 };
+
 
 app.use(cors(corsOptions));
 app.use(express.json());
