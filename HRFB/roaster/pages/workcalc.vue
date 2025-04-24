@@ -65,6 +65,7 @@ const datas = ref<TeamResponse | null>(null)
 const bossAppointments = ref<Appointment[]>([])
 const filteredAppointments = ref<Appointment[]>([])
 const currentUserName = ref<string>('')
+const currentUserPost = ref<string>('')
 
 const showForm = ref(false)
 
@@ -158,7 +159,7 @@ const filterAppointments = (mode: 'my' | 'issued' | 'done') => {
       break
     case 'issued':
       result = bossAppointments.value.filter(task =>
-        task.from === currentUserName.value
+        task.from === currentUserPost.value
       )
       break
     case 'done':
@@ -181,9 +182,10 @@ const fetchWorkers = async () => {
     datas.value = response.data
     bossAppointments.value = response.data.boss.appointments
     currentUserName.value = response.data.user.name
+    currentUserPost.value = response.data.user.post
 
     console.log("Boss",bossAppointments.value)
-    console.log("Username",currentUserName.value)
+    console.log("Username",currentUserPost.value)
     filterAppointments('my') // показываем по умолчанию "Мої задачі"
   } catch (error) {
     console.error('Ошибка при загрузке данных:', error)
