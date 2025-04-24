@@ -154,12 +154,12 @@ const filterAppointments = (mode: 'my' | 'issued' | 'done') => {
     case 'my':
       result = bossAppointments.value.filter(task =>
 
-        task.whoisdoing === currentUserName.value && task.status !== 'complete'
+        task.whoisdoing === currentUserPost.value && task.status !== 'complete'
       )
       break
     case 'issued':
       result = bossAppointments.value.filter(task =>
-        task.from === currentUserPost.value
+        task.from === currentUserName.value
       )
       break
     case 'done':
