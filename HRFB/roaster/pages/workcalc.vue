@@ -152,6 +152,7 @@ const filterAppointments = (mode: 'my' | 'issued' | 'done') => {
   switch (mode) {
     case 'my':
       result = bossAppointments.value.filter(task =>
+
         task.whoisdoing === currentUserName.value && task.status !== 'complete'
       )
       break
@@ -182,6 +183,7 @@ const fetchWorkers = async () => {
     currentUserName.value = response.data.user.name
 
     console.log("Boss",bossAppointments.value)
+    console.log("Username",currentUserName.value)
     filterAppointments('my') // показываем по умолчанию "Мої задачі"
   } catch (error) {
     console.error('Ошибка при загрузке данных:', error)
