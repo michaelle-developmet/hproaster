@@ -48,6 +48,7 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { RocketIcon } from '@radix-icons/vue'
+import { SERVER_URL } from '../utils/con.js';
 
 
 
@@ -122,7 +123,7 @@ const FinishRoastFormData = ref<{
 
 const submitForm = async () => {
   try {
-    const { data } = await axios.post('http://3.70.45.39:5011/api/submit-form', formData.value,{
+    const { data } = await axios.post(`${SERVER_URL}/api/submit-form`, formData.value,{
         withCredentials:true
     });
     // alert('Форма успешно отправлена');
@@ -155,7 +156,7 @@ let user:any = ref<User[]>
 
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://3.70.45.39:5011/api/team', {
+        const response = await axios.get(`${SERVER_URL}/api/team`, {
             withCredentials: true, // Отправляем куки с запросом
         });
         user = response.data.user;
@@ -285,7 +286,7 @@ const submitFormRoasting = async () => {
     }
 
     // Отправляем данные на сервер
-    const { data } = await axios.post('http://3.70.45.39:5011/api/update-roasting', updatedFormData, {
+    const { data } = await axios.post(`${SERVER_URL}/api/update-roasting`, updatedFormData, {
       withCredentials: true,
     });
 
@@ -329,7 +330,7 @@ const submitFormFinishRoasting = async () => {
     console.log(updatedFormData)
 
     // Отправляем данные на сервер
-    const { data } = await axios.post('http://3.70.45.39:5011/api/finish_roasting', updatedFormData, {
+    const { data } = await axios.post(`${SERVER_URL}/api/finish_roasting`, updatedFormData, {
       withCredentials: true,
     });
 

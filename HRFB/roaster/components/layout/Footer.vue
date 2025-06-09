@@ -15,7 +15,96 @@ import {
   MenubarTrigger,
 } from '@/components/ui/menubar'
 
-import { Lock } from 'lucide-vue-next';
+import { Lock, Eye } from 'lucide-vue-next';
+import { SERVER_URL } from '../../utils/con';
+
+function fetchOwnAccessCheck(SERVER_URL: any, cacheKey = 'own_access_check_cache', cacheDurationMs = 15 * 60 * 1000) {
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      if (Date.now() - parsed.timestamp < cacheDurationMs) {
+        return Promise.resolve(parsed.data);
+      }
+    } catch (e) {
+      console.warn('Ошибка при парсинге кэша:', e);
+    }
+  }
+
+  const url = `${SERVER_URL}/api/own_acces_check`;
+
+  return fetch(url, {
+    method: 'GET',
+    credentials: 'include', // 👈 Вот сюда
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('Ошибка сети');
+      return res.json();
+    })
+    .then(data => {
+      localStorage.setItem(cacheKey, JSON.stringify({
+        data,
+        timestamp: Date.now(),
+      }));
+      return data;
+    });
+}
+
+const accessData = ref(null);
+const error = ref<string | null>(null);
+
+
+function getAccessLevel(path: string): 'hide' | 'show' | 'use' {
+  const access = accessData.value?.access || {};
+  const [section, sub] = path.split('.');
+
+  if (sub) {
+    return access?.[section]?.[sub] || 'hide';
+  }
+
+  return access?.[section] || 'hide';
+}
+
+const AccessLink = defineComponent({
+  props: {
+    to: { type: String, required: true },
+    label: { type: String, required: true },
+    access: { type: String as PropType<'hide' | 'show' | 'use'>, required: true },
+  },
+  setup(props) {
+    return () => {
+      if (props.access === 'hide') {
+        return h('span', {
+          style: 'opacity: 0.5; pointer-events: none; display: flex; align-items: center; gap: 4px;',
+        }, [
+          props.label,
+          h(Lock, { style: 'width: 12px; color: #FFE31A;' }),
+        ]);
+      }
+
+      return h('div', {
+        style: 'display: flex; align-items: center; gap: 4px;',
+      }, [
+        h(resolveComponent('NuxtLink'), { to: props.to }, () => props.label),
+        props.access === 'show'
+          ? h(Eye, { style: 'width: 12px; color: #FFE31A;' })
+          : null,
+      ]);
+    };
+  }
+});
+
+
+onMounted(() => {
+  fetchOwnAccessCheck(SERVER_URL)
+    .then(data => {
+      accessData.value = data;
+    })
+    .catch(err => {
+      error.value = err.message || 'Ошибка получения доступа';
+    });
+});
+
 
 </script>
 
@@ -56,15 +145,29 @@ import { Lock } from 'lucide-vue-next';
                 <MenubarTrigger>Зелена кава</MenubarTrigger>
                 <MenubarContent>
                     <MenubarItem>
+                            <AccessLink
+                                :to="'/assorti'"
+                                label="Асортимент"
+                                :access="getAccessLevel('green_kava.postavka')"
+                            />
                          
-                         <NuxtLink to="/assorti">Асортимент</NuxtLink> <MenubarShortcut>  <Lock style="width: 12px; color: #FFE31A;" /></MenubarShortcut>
                      </MenubarItem>
                     <MenubarItem>
                          
-                        <NuxtLink to="/green">Замовлення</NuxtLink> <MenubarShortcut>  <Lock style="width: 12px; color: #FFE31A;" /></MenubarShortcut>
+                         
+                        <AccessLink
+    :to="'/green'"
+    label="Замовлення"
+    :access="getAccessLevel('green_kava.work')"
+  />
                     </MenubarItem>
                     <MenubarItem>
-                            <NuxtLink to="/greensklad">Склад</NuxtLink>
+
+                            <AccessLink
+    :to="'/greensklad'"
+    label="Склад"
+    :access="getAccessLevel('green_kava.sklad')"
+  />
                     </MenubarItem>
                 </MenubarContent>
                 
@@ -77,11 +180,23 @@ import { Lock } from 'lucide-vue-next';
                         
                          
 
-                        <NuxtLink to="/roastingwork">Робоча</NuxtLink>
+
+                        <AccessLink
+                                :to="'/roastingwork'"
+                                label="Робоча"
+                                :access="getAccessLevel('roasted.work')"
+                            />
                     </MenubarItem>
                     <MenubarItem>
                         
-                        <NuxtLink to="/roastingsklad">Склад</NuxtLink>
+
+
+
+                        <AccessLink
+                                :to="'/roastingsklad'"
+                                label="Склад"
+                                :access="getAccessLevel('roasted.sklad')"
+                            />
                             
                     </MenubarItem>
                 </MenubarContent>
@@ -93,12 +208,24 @@ import { Lock } from 'lucide-vue-next';
                 <MenubarContent>
                     <MenubarItem>
                          
-                        <NuxtLink to="/packingwork">Робоча</NuxtLink>
+
+
+                        <AccessLink
+                                :to="'/packingwork'"
+                                label="Робоча"
+                                :access="getAccessLevel('packing.work')"
+                            />
+
 
                     </MenubarItem>
                     <MenubarItem>
-                        <NuxtLink to="/packingsklad">Склад</NuxtLink>
                             
+                        <AccessLink
+                                :to="'/packingsklad'"
+                                label="Склад"
+                                :access="getAccessLevel('packing.sklad')"
+                            />
+
                     </MenubarItem>
                 </MenubarContent>
                 
@@ -109,7 +236,14 @@ import { Lock } from 'lucide-vue-next';
                 <MenubarContent>
                     <MenubarItem>
                         
-                        <NuxtLink to="/addition">Робоча</NuxtLink>
+
+
+                        <AccessLink
+                                :to="'/addition'"
+                                label="Робоча"
+                                :access="getAccessLevel('addition.work')"
+                            />
+                        
                     </MenubarItem>
                     <MenubarItem>
                             Склад

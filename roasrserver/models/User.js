@@ -41,6 +41,7 @@ const UserSchema = new mongoose.Schema({
                 author:{type:String},
                 globalWeight:{type:Number},
                 globalRoastWeight:{type:Number,default:0},
+                packingArray:{type:Array}
               },
             ],
 
@@ -169,6 +170,10 @@ const UserSchema = new mongoose.Schema({
       secondary_text_color:{type:String,default:"basic"},
       head_text_color:{type:String,default:"basic"},
       senders:{type:Boolean,default:true}
+    },
+    own_roles: {
+      type: Array,
+      default: []
     }
   }, { strict: false });
   

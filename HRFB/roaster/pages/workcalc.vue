@@ -18,6 +18,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
+import { SERVER_URL } from '../utils/con.js';
 
 
 const value = ref(today(getLocalTimeZone())) as Ref<DateValue>
@@ -121,7 +122,7 @@ const assignTask = async () => {
     const currentUser = datas.value.user.name
 
     await axios.post(
-      'http://3.70.45.39:5011/api/assign_task',
+      `${SERVER_URL}/api/assign_task`,
       {
         ...taskForm.value,
         from: currentUser
@@ -175,7 +176,7 @@ const filterAppointments = (mode: 'my' | 'issued' | 'done') => {
 
 const fetchWorkers = async () => {
   try {
-    const response = await axios.get<TeamResponse>('http://3.70.45.39:5011/api/team', {
+    const response = await axios.get<TeamResponse>(`${SERVER_URL}/api/team`, {
       withCredentials: true
     })
 
@@ -209,7 +210,7 @@ const markComplete = async (taskId: string) => {
     };
 
     // Отправляем запрос на сервер
-    await axios.put(`http://3.70.45.39:5011/api/tasks/complete`, payload, { withCredentials: true });
+    await axios.put(`${SERVER_URL}/api/tasks/complete`, payload, { withCredentials: true });
 
     // Обновляем статус задачи на фронте
     task.status = 'complete';

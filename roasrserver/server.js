@@ -17,6 +17,8 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5011;
 
+const server_url_point = process.env.SERVER_URL
+
 
 
 connectDB();
@@ -141,6 +143,45 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Функция для объединения прав из массива own_roles
+function mergeAccess(own_roles) {
+  const defaultAccess = {
+    green_kava: { postavka: 'hide', work: 'hide', sklad: 'hide' },
+    roasted: { work: 'hide', sklad: 'hide' },
+    packing: { work: 'hide', sklad: 'hide' },
+    addition: { work: 'hide', sklad: 'hide' },
+    statistic: {
+      green_kava: {},
+      roasted: {},
+      packing: {},
+      addition: {}
+    },
+    settings: { role_offer: 'hide', workers_offer: 'hide' }
+  };
+
+  if (!own_roles || !own_roles.length) return defaultAccess;
+
+  return own_roles.reduce((acc, role) => {
+    for (const section in role.access) {
+      if (!acc[section]) acc[section] = {};
+      for (const key in role.access[section]) {
+        // если значение в роли более "открытое" - перезаписываем
+        // "hide" < "show" < true, поэтому пример простой, можно адаптировать логику
+        const current = acc[section][key];
+        const candidate = role.access[section][key];
+
+        if (typeof current === 'undefined' || current === 'hide') {
+          acc[section][key] = candidate;
+        } else if (current === 'show' && candidate === true) {
+          acc[section][key] = candidate;
+        }
+      }
+    }
+    return acc;
+  }, JSON.parse(JSON.stringify(defaultAccess))); // глубокий клон
+}
+
+
 
 // Маршрут для логина
 app.post('/api/login', async (req, res) => {
@@ -203,11 +244,14 @@ app.get('/api/team', authMiddleware, async (req, res) => {
 
         // Получаем список работников по их ID (или можно искать по email/другим полям)
         const workers = await User.find({ post: { $in: user.workers } });
+// Альтернатива — все, у кого bossPost совпадает с post у босса
+      const alternative = await User.find({ bossPost: boss.post });
 
         res.json({
             user, // Возвращаем данные текущего пользователя
             workers, // Возвращаем данные работников
             boss,
+            alternative
         });
     } catch (err) {
         console.error(err.message);
@@ -705,7 +749,10 @@ app.post('/api/finish_roasting', authMiddleware, async (req, res) => {
 
   boss.datas.roast_kava.in_roast = boss.datas.roast_kava.in_roast.filter(item => item.roastId !== roastId);
 
-  let currentLot = boss.datas.green_kava_work.find(item => item.lotId !== lotId);
+  console.log('lotid',lotId)
+  let currentLot = boss.datas.green_kava_work.find(item => item.lotId == lotId);
+
+  console.log("current lot",currentLot)
 
   currentLot.globalRoastWeight = Number(currentLot.globalRoastWeight || 0) + Number(roast_volume || 0);
 
@@ -1077,36 +1124,6 @@ app.post('/api/add_role', authMiddleware, async (req, res) => {
 });
 
 
-// app.get('api/get_all_roles',authMiddleware, async (req, res) =>{
-//   try {
-//     // Ищем текущего пользователя
-//     const user = await User.findById(req.user.userId); // Мы не исключаем поля, чтобы получить все данные
-//     if (!user) {
-//         return res.status(404).json({ msg: 'Пользователь не найден' });
-//     }
-
-
-//     let boss = await User.findOne({post:user.bossPost})
-
-//     if (!boss){
-//         boss = await User.findOne({post:user.post})
-//     }
-
-//     // Получаем список работников по их ID (или можно искать по email/другим полям)
-//     const workers = await User.find({ post: { $in: user.workers } });
-
-//     res.json({
-//         user, // Возвращаем данные текущего пользователя
-//         workers, // Возвращаем данные работников
-//         boss,
-//     });
-// } catch (err) {
-//     console.error(err.message);
-//     res.status(500).json({ msg: 'Ошибка сервера' });
-// }
-// })
-
-
 
 app.get('/api/get_all_roles', authMiddleware, async (req, res) => {
   try {
@@ -1212,7 +1229,7 @@ app.post('/api/submit_packing', authMiddleware, async (req, res) => {
       if (roastedLot) {
         console.log("RoastedLot",roastedLot)
         roastedLot.globalRoastWeight = Math.max((roastedLot.globalRoastWeight || 0) - volume, 0);
-        lotName = roastedLot.lotName || '';
+        lotName = roastedLot.lotNumber || '';
       }
     }
 
@@ -1223,6 +1240,12 @@ app.post('/api/submit_packing', authMiddleware, async (req, res) => {
         pack.count = Math.max((pack.count || 0) - packCount, 0);
       }
     }
+
+    // const findLotName = boss.datas.additions.packs.find(p => p.packId === packId);
+    // if (pack) {
+    //   pack.count = Math.max((pack.count || 0) - packCount, 0);
+    // }
+
 
     // 3. Списываем стикеры
     if (Array.isArray(boss.datas.additions?.stickers)) {
@@ -1241,9 +1264,11 @@ app.post('/api/submit_packing', authMiddleware, async (req, res) => {
       lotObj = {
         lotId,
         lotName,
-        globalPackWeight: volume,
+        globalPackWeight: 0,
         lots_inside: []
       };
+      console.log("lotObj",lotObj)
+
       boss.datas.pack_kava.push(lotObj);
       lotIndex = boss.datas.pack_kava.length - 1;
     } else {
@@ -1370,10 +1395,92 @@ app.put('/api/update_role_access', authMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/assign-role', authMiddleware, async (req, res) => {
+  try {
+    const { userId, role } = req.body;
+
+    if (!userId || !role) {
+      return res.status(400).json({ msg: 'Недостаточно данных' });
+    }
+
+    // Ищем пользователя, которому добавляем роль
+    const targetUser = await User.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({ msg: 'Пользователь не найден' });
+    }
+
+    // Проверяем наличие поля own_roles и создаем при необходимости
+    if (!targetUser.own_roles) {
+      targetUser.own_roles = [];
+    }
+
+    // Проверка — чтобы не дублировать роль
+    const alreadyHasRole = targetUser.own_roles.some(
+      (r) => r.role_id === role.role_id
+    );
+    if (alreadyHasRole) {
+      return res.status(400).json({ msg: 'Роль уже назначена этому пользователю' });
+    }
+
+    // Добавляем роль
+    targetUser.own_roles.push(role);
+
+    await targetUser.save();
+
+    res.json({ msg: 'Роль успешно добавлена', own_roles: targetUser.own_roles });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Ошибка сервера' });
+  }
+});
+
+
+
+app.get('/api/own_acces_check', authMiddleware, async (req, res) => {
+  try {
+    // Ищем текущего пользователя
+    const user = await User.findById(req.user.userId); // Мы не исключаем поля, чтобы получить все данные
+    if (!user) {
+        return res.status(404).json({ msg: 'Пользователь не найден' });
+    }
+
+
+    let boss = await User.findOne({post:user.bossPost})
+
+    if (!boss){
+        boss = await User.findOne({post:user.post})
+    }
+
+// Берём первый объект из user.own_roles
+const firstRole = (user.own_roles && user.own_roles.length > 0) ? user.own_roles[0] : null;
+
+if (!firstRole) {
+  return res.status(400).json({ msg: 'У пользователя нет ролей' });
+}
+
+// Находим у босса роль с таким role_id
+const bossRole = boss.roles.find(role => role.role_id === firstRole.role_id);
+
+if (!bossRole) {
+  return res.status(404).json({ msg: 'Роль у босса не найдена' });
+}
+
+// Отправляем объект роли босса клиенту
+res.json(bossRole)
+} catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Ошибка сервера' });
+}
+
+})
 
 // Запуск сервера
-app.listen(5011 , '0.0.0.0', () => {
-    console.log(`Server is running on port ${port}`);
+// app.listen(5011 , '0.0.0.0', () => {
+//     console.log(`Server is running on port ${port}`);
+// });
+
+app.listen(5011 , () => {
+  console.log(`Server is running on port ${port}`);
 });
 
 

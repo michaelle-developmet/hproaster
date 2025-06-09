@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import axios from 'axios';
 import { ref } from 'vue';
+import { SERVER_URL } from '../utils/con.js';
 
 definePageMeta({
   layout: 'auth'  // Указываем, что эта страница использует layout 'auth'
@@ -38,7 +39,7 @@ const handleRegister = async () => {
     }
 
     const response = await axios.post(
-      'http://3.70.45.39:5011/api/register',
+      `${SERVER_URL}/api/register`,
       requestData,
       {
         withCredentials: true, // Отправка cookies с запросом
@@ -128,16 +129,7 @@ const handleRegister = async () => {
 </template>
 
 <style scoped>
-.main_block {
-    /* width: 25vw;
-    height: 55vh;
-    position: absolute;
-    margin: 0 auto;
-    left: 0;
-    right: 0;
-    top: 20vh; */
 
-}
 
 .glob{
   background: linear-gradient(90deg, #FC466B 0%, #3F5EFB 100%);

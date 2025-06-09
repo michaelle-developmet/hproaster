@@ -31,6 +31,8 @@
   import axios from 'axios';
   import { BellDot, Haze, MessageSquareMore } from 'lucide-vue-next';
   import { MessagesSquare } from 'lucide-vue-next';
+  import { SERVER_URL } from '../../utils/con.js';
+  
 
   const route = useRoute();
   
@@ -66,7 +68,7 @@
   
   const fetchShiftStatus = async () => {
     try {
-      const res = await axios.get('http://localhost:5011/team', {
+      const res = await axios.get(`${SERVER_URL}/api/team`, {
             withCredentials: true, // Отправляем куки с запросом
         }); // получаем shift_status
       shiftStatus.value = res.data.user.shift_status;
@@ -81,7 +83,7 @@
       loading.value = true;
 
       const res = await axios.post(
-  'http://localhost:5011/api/toggle_shift',
+        `${SERVER_URL}/api/toggle_shift`,
   {}, // тело запроса (пустое)
   {
     withCredentials: true // вот сюда!

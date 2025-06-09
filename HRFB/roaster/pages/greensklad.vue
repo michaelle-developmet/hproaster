@@ -39,7 +39,7 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { RocketIcon } from '@radix-icons/vue'
-
+import { SERVER_URL } from '../utils/con.js';
 
 
 
@@ -64,7 +64,7 @@ interface User {
 let user:any = ref<User[]>
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://3.70.45.39:5011/api/team', {
+        const response = await axios.get(`${SERVER_URL}/api/team`, {
             withCredentials: true, // Отправляем куки с запросом
         });
         user = response.data.user;
@@ -187,7 +187,7 @@ const submitRoastingOrder = async () => {
 
   try {
     const response = await axios.put(
-      `http://3.70.45.39:5011/api/lots/${selectedInvoiceForRoasting.value.lotId}/roasting`,
+      `${SERVER_URL}/api/lots/${selectedInvoiceForRoasting.value.lotId}/roasting`,
       orderData,
       { withCredentials: true }
     );

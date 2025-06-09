@@ -3,6 +3,9 @@
 import { ref , computed , onMounted , watch } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router'
+import { SERVER_URL } from '../utils/con.js';
+
+
 
 
 // import { useToast } from '@/components/ui/toast/use-toast'
@@ -109,7 +112,7 @@ const stickerDialog = (stickerId: string) => {
 
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://3.70.45.39:5011/api/team', {
+        const response = await axios.get(`${SERVER_URL}/api/team`, {
             withCredentials: true, // Отправляем куки с запросом
         });
         user = response.data.user;
@@ -181,7 +184,7 @@ const submitPack = async () => {
 
 
   try {
-    const res = await axios.post('http://3.70.45.39:5011/api/add_pack', formData, {
+    const res = await axios.post(`${SERVER_URL}/api/add_pack`, formData, {
       withCredentials: true,
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -202,7 +205,7 @@ const submitPack = async () => {
 
 const submitPackCount = async () => {
   try {
-    await axios.post('http://3.70.45.39:5011/api/update_pack_count', {
+    await axios.post(`${SERVER_URL}/api/update_pack_count`, {
       packId: selectedPackId.value,
       countToAdd: Number(addedCount.value),
     }, { withCredentials: true })
@@ -231,7 +234,7 @@ const submitSticker = async () => {
 
 
   try {
-    const res = await axios.post('http://3.70.45.39:5011/api/add_sticker', formData, {
+    const res = await axios.post(`${SERVER_URL}/api/add_sticker`, formData, {
       withCredentials: true,
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -253,7 +256,7 @@ const submitSticker = async () => {
 
 const submitStickerCount = async () => {
   try {
-    await axios.post('http://3.70.45.39:5011/api/update_sticker_count', {
+    await axios.post(`${SERVER_URL}/api/update_sticker_count`, {
       stickerId: selectedStickerId.value,
       addedStickerCount: Number(addedStickerCount.value),
     }, { withCredentials: true })

@@ -5,6 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import axios from 'axios'
+import { SERVER_URL } from '../utils/con.js';
+
+
 
 definePageMeta({
   layout: 'auth'  // Указываем, что эта страница использует layout 'auth'
@@ -14,10 +17,12 @@ definePageMeta({
 const post = ref('')
 const password = ref('')
 
+
+
 // Функция для отправки данных на сервер
 const loginUser = async () => {
   try {
-    const response = await axios.post('http://3.70.45.39:5011/api/login', {
+    const response = await axios.post(`${SERVER_URL}/api/login`, {
       post: post.value,  // Используем post вместо email
       password: password.value,
     }, {
@@ -26,6 +31,7 @@ const loginUser = async () => {
     
     // Если успешная авторизация, переходим на домашнюю страницу
     if (response.status === 200) {
+      localStorage.setItem('access', JSON.stringify(response.data.access));
       window.location.href = '/'  // Переход на главную страницу
     }
   } catch (error) {
@@ -98,15 +104,6 @@ const loginUser = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.main_block {
-  /* width: 25vw;
-  height: 65vh;
-  position: absolute;
-  margin: 0 auto;
-  left: 0;
-  right: 0;
-  top: 20vh; */
 }
 
 .card_block{

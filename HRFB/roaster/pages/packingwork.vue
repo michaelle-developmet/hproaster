@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { SERVER_URL } from '../utils/con.js';
 
 const router = useRouter()
 
@@ -48,7 +49,7 @@ const stickerOptions = computed(() => user.value?.datas?.additions?.stickers || 
 // Получение данных
 const fetchRoast = async () => {
   try {
-    const { data } = await axios.get('http://3.70.45.39:5011/api/get_roasted_kava', {
+    const { data } = await axios.get(`${SERVER_URL}/api/get_roasted_kava`, {
       withCredentials: true
     })
     roasted.value = data.user
@@ -60,7 +61,7 @@ const fetchRoast = async () => {
 
 const fetchWorkers = async () => {
   try {
-    const { data } = await axios.get('http://3.70.45.39:5011/api/team', {
+    const { data } = await axios.get(`${SERVER_URL}/api/team`, {
       withCredentials: true
     })
     user.value = data.boss
@@ -135,7 +136,7 @@ const sendPackingData = async () => {
   };
 
   try {
-    const response = await axios.post('http://3.70.45.39:5011/api/submit_packing', payload, {
+    const response = await axios.post(`${SERVER_URL}/api/submit_packing`, payload, {
       withCredentials: true,
     });
 
@@ -163,7 +164,7 @@ const sendPackingData = async () => {
     <div class="main_block">
 
         <div class="button_line">
-            <button class="type" @click="selectCategory('list')" >Замовлення на фасовку</button>
+            <button class="type" @click="selectCategory('list')" >Доступно для фасовки</button>
             <button class="type" @click="selectCategory('work')" >Фасування</button>
 
     </div>
@@ -252,8 +253,8 @@ const sendPackingData = async () => {
             <div class="packing_work" v-if="selectedCategory === 'list'">
                 <Table>
   <TableHeader class="head_of_table">
-    <TableRow>
-      <TableHead class="w-[100px] tbl">Номер лоту</TableHead>
+    <TableRow >
+      <TableHead class="tbl">Номер лоту</TableHead>
       <TableHead class="tbl">Назва лоту</TableHead>
       <TableHead class="tbl">Остання дата обсмажки</TableHead>
       <TableHead class="tbl">Вага</TableHead>
@@ -265,8 +266,8 @@ const sendPackingData = async () => {
     <TableRow v-for="(item, index) in roasted" :key="index">
       <TableCell class="font-medium tbl">{{ index + 1 }}</TableCell>
       <TableCell class="tbl">{{ item.name }}</TableCell>
-      <TableCell class="tbl">—</TableCell> <!-- Здесь вставь дату если появится -->
-      <TableCell class="tbl">{{ item.globalRoastWeight }} кг</TableCell> <!-- Здесь вставь вес если появится -->
+      <TableCell class="tbl">—</TableCell>
+      <TableCell class="tbl">{{ item.globalRoastWeight }} кг</TableCell> 
       <TableCell class="tbl">
         <button class="btn">Дія</button>
       </TableCell>
@@ -331,12 +332,65 @@ const sendPackingData = async () => {
   .packing_order{
     width: 100%;
     height: 10vw;
-    border: 1px solid red;
+    display: flex;
+    flex-flow: column;
+    color: white;
+    padding: 20px;
   }
+
+  .packing_order > label{
+margin-top: 10px;
+  }
+
+  .packing_order > button{
+margin-top: 10px;
+  }
+
+  .packing_order > input{
+margin-top: 10px;
+background: rgba(12, 12, 12, 0.332);
+padding:10px;
+  }
+
+  .packing_order > select{
+    margin-top: 10px;
+  background: rgba(12, 12, 12, 0.332);
+  padding: 10px;
+  height: 40px;
+  color: white;
+  border: none;
+  outline: none;
+  appearance: none; /* отключает системный стиль стрелки */
+  -webkit-appearance: none; /* для Safari */
+  -moz-appearance: none; /* для Firefox */
+  border-radius: 4px;
+  }
+
+  .packing_order > label > select{
+    margin-top: 10px;
+  background: rgba(12, 12, 12, 0.332);
+  padding: 10px;
+  height: 40px;
+  color: white;
+  border: none;
+  outline: none;
+  appearance: none; /* отключает системный стиль стрелки */
+  -webkit-appearance: none; /* для Safari */
+  -moz-appearance: none; /* для Firefox */
+  border-radius: 4px;
+  margin-left: 10px;
+  }
+
+
 
   .packing_work{
     width: 100%;
     height: 10vw;
-    border: 1px solid red;
+
   }
+
+  .tbl{
+    color: white;
+  }
+  
 </style>

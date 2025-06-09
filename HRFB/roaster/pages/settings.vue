@@ -17,6 +17,7 @@ import axios from 'axios';
 
 // Иконки
 import { EyeOff, Eye, Pencil } from 'lucide-vue-next';
+import { SERVER_URL } from '../utils/con.js';
 
 
 
@@ -99,6 +100,9 @@ const selectedRoleId = ref<string | null>(null)
 // Состояние для хранения доступов выбранной роли
 const roleAccess = ref<Record<string, any> | null>(null)
 
+const selectedUser = ref(null)
+const selectedRole = ref(null)
+
 // Функция для выбора категории
 const selectCategory = (category: string) => {
     selectedCategory.value = category
@@ -109,7 +113,7 @@ const selectCategory = (category: string) => {
 
 const submitNewRole = async () => {
   try {
-    await axios.post('http://3.70.45.39:5011/api/add_role', {
+    await axios.post(`${SERVER_URL}/api/add_role`, {
       role_name: newRoleName.value,
       decorative: isDecorative.value,
     }, { withCredentials: true });
@@ -128,10 +132,10 @@ const submitNewRole = async () => {
 
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://3.70.45.39:5011/api/team', {
+        const response = await axios.get(`${SERVER_URL}/api/team`, {
             withCredentials: true, // Отправляем куки с запросом
         });
-        user = response.data.user;
+        user = response.data;
         console.log("invocice",user)
     } catch (error) {
         console.error('Ошибка при загрузке работников:', error);
@@ -141,7 +145,7 @@ const fetchWorkers = async () => {
 const fetchAllRolses = async ()=>{
 
     try {
-        const res = await axios.get('http://3.70.45.39:5011/api/get_all_roles',{
+        const res = await axios.get(`${SERVER_URL}/api/get_all_roles`,{
             withCredentials: true, // Отправляем куки с запросом
         });
         console.log("response",res)
@@ -157,7 +161,7 @@ const fetchAllRolses = async ()=>{
 const fetchAllStyles= async ()=>{
 
 try {
-    const res = await axios.get('http://3.70.45.39:5011/api/get_all_styles',{
+    const res = await axios.get(`${SERVER_URL}/api/get_all_styles`,{
         withCredentials: true, // Отправляем куки с запросом
     });
     console.log("response",res)
@@ -218,7 +222,7 @@ const sendUpdatedAccess = async () => {
   };
 
   try {
-    await axios.put('http://3.70.45.39:5011/api/update_role_access', updatedAccess, {
+    await axios.put(`${SERVER_URL}/api/update_role_access`, updatedAccess, {
       withCredentials: true,
     });
     console.log('Access updated');
@@ -228,6 +232,35 @@ const sendUpdatedAccess = async () => {
     console.error('Ошибка при обновлении доступа:', error);
   }
 };
+
+const assignRoleToUser = async () => {
+  if (!selectedUser.value || !selectedRole.value) return
+
+  try {
+    await axios.post(
+  `${SERVER_URL}/api/assign-role`,
+  {
+    userId: selectedUser.value._id,
+    role: selectedRole.value,
+  },
+  {
+    withCredentials: true,
+  }
+);
+
+    // Обновляем локально
+    if (!selectedUser.value.own_roles) {
+      selectedUser.value.own_roles = []
+    }
+    selectedUser.value.own_roles.push(selectedRole.value)
+
+    selectedUser.value = null
+    selectedRole.value = null
+  } catch (err) {
+    console.error('Ошибка при назначении роли:', err)
+  }
+}
+
 
 
 // Проверка наличия токена в куки при монтировании компонента
@@ -263,7 +296,8 @@ onMounted(() => {
 
         <div class="button_line">
             <button class="type"  @click="selectCategory('visual')" >Налаштування візуалу</button>
-        <button class="type"  @click="selectCategory('roles')" >Ролі</button>
+          <button class="type"  @click="selectCategory('roles')" >Ролі</button>
+          <button class="type"  @click="selectCategory('workers')" >Персонал</button>
         <!-- <button class="type" @click="selectCategory('workers')" >Персонал </button> -->
 
       <!-- <button class="type" @click="selectCategory('scotch')">Скотч</button>
@@ -290,37 +324,76 @@ onMounted(() => {
 
 
             <div class="content" v-if="selectedCategory === 'workers'">
-                <div class="worker_plate">
-                  <Avatar>
-                    <AvatarImage src="https://github.com/radix-vue.png" alt="@radix-vue" />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                  <span class="name">Катерина</span>
-                  <span class="badge">Roaster 🔥</span>
-                  <span class="badge">Roaster 🔥</span>
-                  <span class="badge">Roaster 🔥</span>
-                </div>
-                <div class="worker_plate">
-                  <Avatar>
-                    <AvatarImage src="https://github.com/radix-vue.png" alt="@radix-vue" />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                  <span class="name">Катерина</span>
-                  <span class="badge">Roaster 🔥</span>
-                  <span class="badge">Roaster 🔥</span>
-                  <span class="badge">Roaster 🔥</span>
-                </div>
-                <div class="worker_plate">
-                  <Avatar>
-                    <AvatarImage src="https://github.com/radix-vue.png" alt="@radix-vue" />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                  <span class="name">Катерина</span>
-                  <span class="badge">Roaster 🔥</span>
-                  <span class="badge">Roaster 🔥</span>
-                  <span class="badge">Roaster 🔥</span>
-                </div>
+    <div
+      class="worker_plate"
+      v-for="worker in user.alternative"
+      :key="worker._id"
+    >
+      <Avatar>
+        <AvatarImage src="https://github.com/radix-vue.png" :alt="worker.name" />
+        <AvatarFallback>{{ worker.name?.slice(0, 2).toUpperCase() || '??' }}</AvatarFallback>
+      </Avatar>
+      <span class="name">{{ worker.name }}</span>
+
+      <template v-if="worker.own_roles?.length">
+        <span
+          v-for="(role, index) in worker.own_roles"
+          :key="index"
+          class="badge"
+        >
+          {{ role.role_name }}
+        </span>
+      </template>
+
+      <!-- Если нет ролей — показываем диалог с кнопкой "+" -->
+      <Dialog v-if="!worker.own_roles || worker.own_roles.length < 3">
+        <DialogTrigger as-child>
+          <Button
+            class="badge bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2"
+            @click="() => selectedUser = worker"
+          >
+            +
+          </Button>
+        </DialogTrigger>
+        <DialogContent class="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Призначити роль</DialogTitle>
+            <DialogDescription>
+              Виберіть роль для користувача <strong>{{ selectedUser?.name }}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div class="grid gap-4 py-4">
+            <div class="grid grid-cols-4 items-center gap-4">
+              <Label for="role-select" class="text-right">Роль</Label>
+              <select
+                id="role-select"
+                v-model="selectedRole"
+                class="col-span-3 border px-2 py-1 rounded"
+              >
+                <option disabled value="">-- Виберіть роль --</option>
+                <option
+                  v-for="role in user.boss.roles"
+                  :key="role.role_id"
+                  :value="role"
+                >
+                  {{ role.role_name }}
+                </option>
+              </select>
             </div>
+          </div>
+
+          <DialogFooter>
+            <Button @click="assignRoleToUser">Додати</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+          </div>
+
+
+
+          
 
             <div class="content roles visual" v-if="selectedCategory === 'roles'">
                 <ScrollArea class="scroll_roles">

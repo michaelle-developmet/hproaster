@@ -44,7 +44,7 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { RocketIcon } from '@radix-icons/vue'
-
+import { SERVER_URL } from '../utils/con.js';
 
 
 // Массив который хранит все лоты
@@ -93,7 +93,7 @@ const formData = ref({
 
 const submitForm = async () => {
   try {
-    const { data } = await axios.post('http://3.70.45.39:5011/api/submit-form', formData.value,{
+    const { data } = await axios.post(`${SERVER_URL}/api/submit-form`, formData.value,{
         withCredentials:true
     });
     // alert('Форма успешно отправлена');
@@ -126,7 +126,7 @@ let user:any = ref<User[]>
 
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://3.70.45.39:5011/api/team', {
+        const response = await axios.get(`${SERVER_URL}/api/team`, {
             withCredentials: true, // Отправляем куки с запросом
         });
         user = response.data.user;
@@ -143,7 +143,7 @@ const fetchWorkers = async () => {
 
 const fetchPostavki = async () => {
     try {
-        const response = await axios.get('http://3.70.45.39:5011/api/team', {
+        const response = await axios.get(`${SERVER_URL}/api/team`, {
             withCredentials: true, // Отправляем куки с запросом
         });
         user = response.data.user;
@@ -247,7 +247,7 @@ const acceptDelivery = async (lot: any) => {
 
   try {
     // Отправляем PUT запрос с использованием lotId
-    const response = await axios.put(`http://3.70.45.39:5011/api/lots/${lotId}`, {
+    const response = await axios.put(`${SERVER_URL}/api/lots/${lotId}`, {
       arrive: currentDate,
       status: 'sklad',
       roasting: false,
@@ -322,7 +322,7 @@ const submitDelivery = async () => {
   };
 
   try {
-    const { data } = await axios.post('http://3.70.45.39:5011/api/submit-delivery', deliveryData, {
+    const { data } = await axios.post(`${SERVER_URL}/api/submit-delivery`, deliveryData, {
       withCredentials: true
     });
     fetchWorkers();

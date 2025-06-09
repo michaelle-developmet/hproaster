@@ -44,7 +44,7 @@ import {
 
 import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
-
+import { SERVER_URL } from '../utils/con.js';
 
 
 interface Worker {
@@ -75,7 +75,7 @@ const workers = ref<Worker[]>([]); // Типизация массива рабо
 
 const fetchWorkers = async () => {
     try {
-        const response = await axios.get('http://3.70.45.39:5011/api/team', {
+        const response = await axios.get(`${SERVER_URL}/api/team`, {
             withCredentials: true, // Отправляем куки с запросом
         });
         workers.value = response.data.workers; // Убедитесь, что сервер возвращает массив объектов с name и post
@@ -125,7 +125,7 @@ onMounted(() => {
 const fetchUserAccess = async (workerPost: string) => {
   try {
     const response = await axios.post(
-      'http://3.70.45.39:5011/api/user/access',
+      `${SERVER_URL}/api/user/access`,
       { post: workerPost },
       { withCredentials: true }
     );
@@ -139,7 +139,7 @@ const fetchUserAccess = async (workerPost: string) => {
 const updateUserAccess = async (workerPost: string) => {
   try {
     await axios.post(
-      'http://3.70.45.39:5011/api/user/update-access',
+      `${SERVER_URL}/api/user/update-access`,
       { post: workerPost, updatedAccess: currentUserAccess.value },
       { withCredentials: true }
     );
@@ -247,7 +247,7 @@ const colorMode = useColorMode()
                             <AvatarImage src="https://github.com/radix-vue.png" alt="@radix-vue" />
                             <AvatarFallback>CN</AvatarFallback>
                         </Avatar>
-                        <h5>Катерина</h5>
+                        <h5>{{user.name}}</h5>
                         <span class="badge">Roaster 🔥</span>
                         <span class="badge">Красуня 🪷</span>
                         <span class="badge">Зірочка 🌟</span>
