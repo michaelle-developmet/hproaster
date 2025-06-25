@@ -27,7 +27,7 @@ const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
       'http://localhost:3000', // Локальный хост
-      'http://3.70.45.39:3000', // Ваш серверный домен
+      'http://13.49.46.74:3000', // Ваш серверный домен
       'http://localhost:5011',
     ];
     if (!origin || allowedOrigins.includes(origin)) {
