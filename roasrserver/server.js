@@ -28,8 +28,9 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000', // Локальный хост
       'http://3.70.45.39:3000', // Ваш серверный домен
+      'http://localhost:5011',
     ];
-    if (allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -48,7 +49,17 @@ app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // доступ к папке /uploads
+console.log("Serving uploads from:", path.join(__dirname, 'uploads'));
+
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+// app.use(express.static(path.join(__dirname, 'uploads'))); 
+// если ты туда копируешь фронт
+
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/index.html'));
+// });
 
 // Маршрут для регистрации
 app.post('/api/register', async (req, res) => {
@@ -1229,7 +1240,7 @@ app.post('/api/submit_packing', authMiddleware, async (req, res) => {
       if (roastedLot) {
         console.log("RoastedLot",roastedLot)
         roastedLot.globalRoastWeight = Math.max((roastedLot.globalRoastWeight || 0) - volume, 0);
-        lotName = roastedLot.lotNumber || '';
+        lotName = boss.datas.green_kava_work.find(lot => lot.lotId === lotId).name;
       }
     }
 
@@ -1285,6 +1296,18 @@ app.post('/api/submit_packing', authMiddleware, async (req, res) => {
       i => i.packId === packId && i.stickerId === stickerId
     );
 
+    // Получаем массив стикеров из boss
+    const stickers = boss?.datas?.additions?.stickers || [];
+
+    // Ищем нужный стикер по stickerId и достаём фото
+    const findStickerPhoto = stickers.find(s => s.stickerId === stickerId)?.photo ?? null;
+
+    // Получаем массив стикеров из boss
+    const packing = boss?.datas?.additions?.packs || [];
+
+    // Ищем нужный стикер по stickerId и достаём фото
+    const findPackingVolume = packing.find(s => s.packId === packId)?.volume ?? null;
+
     if (foundIndex !== -1) {
       lotObj.lots_inside[foundIndex].packCount += packCount;
       lotObj.lots_inside[foundIndex].stickerCount += stickerCount;
@@ -1299,8 +1322,14 @@ app.post('/api/submit_packing', authMiddleware, async (req, res) => {
         createdAt,
         author: user.post,
         packsKavaId: pack_kava_id,
+        lotName:lotName,
+        lotId:lotId,
+        lots_price:[],
+        volume:findPackingVolume,
+        actual_sticker_photo:findStickerPhoto
       });
     }
+
 
     lotObj.globalPackWeight = (lotObj.globalPackWeight || 0) + volume;
     boss.datas.pack_kava[lotIndex] = lotObj;
@@ -1474,56 +1503,296 @@ res.json(bossRole)
 
 })
 
+app.get('/api/get_complete_packs', authMiddleware, async (req, res) => {
+  try {
+      // Ищем текущего пользователя
+      const user = await User.findById(req.user.userId); // Мы не исключаем поля, чтобы получить все данные
+      if (!user) {
+          return res.status(404).json({ msg: 'Пользователь не найден' });
+      }
+
+
+      let boss = await User.findOne({post:user.bossPost})
+
+      if (!boss){
+          boss = await User.findOne({post:user.post})
+      }
+
+      function enrichPackKavaData(boss) {
+        if (!boss?.datas?.pack_kava || !Array.isArray(boss.datas.pack_kava)) {
+          console.error("boss.datas.pack_kava отсутствует или не массив");
+          return [];
+        }
+      
+        const additionsPacks = boss?.datas?.additions?.packs;
+        if (!Array.isArray(additionsPacks)) {
+          console.error("boss.datas.additions.packs отсутствует или не массив");
+          return boss.datas.pack_kava;
+        }
+      
+        const additionsStickers = boss?.datas?.additions?.stickers || [];
+        const packsById = Object.fromEntries(additionsPacks.map(pack => [pack.packId, pack]));
+        const stickersById = Object.fromEntries(additionsStickers.map(sticker => [sticker.stickerId, sticker]));
+      
+        return boss.datas.pack_kava.map(entry => {
+          const lotId = entry.lotId ?? null;
+          const lotName = entry.lotName ?? null;
+      
+          if (!Array.isArray(entry.lots_inside)) {
+            console.warn("lots_inside не массив у лота:", lotId);
+            return { ...entry, lotId, lotName };
+          }
+      
+          const updatedLotsInside = entry.lots_inside.map(item => {
+            const packInfo = item.packId ? packsById[item.packId] : null;
+            const stickerInfo = item.stickerId ? stickersById[item.stickerId] : null;
+      
+            return {
+              ...item,
+              actual_photo: packInfo?.photo ?? null,
+              volume: packInfo?.volume ?? null,
+              actual_sticker_photo: stickerInfo?.photo ?? null,
+              lotId,
+              lotName,
+              lots_price: Array.isArray(item.lots_price) ? item.lots_price : [],  // если есть — оставить, если нет — создать пустой
+            };
+          });
+      
+          return {
+            ...entry,
+            lotId,
+            lotName,
+            lots_inside: updatedLotsInside,
+          };
+        });
+      }
+      
+      
+      
+      
+      
+      
+      
+      
+
+      const complete_packs = enrichPackKavaData(boss);
+
+      console.log("Packs",complete_packs)
+
+      res.json({
+        complete_packs
+      });
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: 'Ошибка сервера' });
+  }
+});
+
+
+app.post('/api/submit_price', authMiddleware, async (req, res) => {
+  try {
+    const { item, newPrice, newValue } = req.body; // получаем из клиента
+
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: 'Користувача не знайдено' });
+    
+    const boss = await User.findOne({ post: user.bossPost });
+    if (!boss) return res.status(404).json({ message: 'Боса не знайдено' });
+    
+    // Проверяем наличие структуры
+    if (!boss.datas?.pack_kava) {
+      return res.status(400).json({ message: 'У босса відсутній pack_kava' });
+    }
+    
+    // Поиск нужного lots_inside-объекта
+    let targetInside = null;
+    for (const pack of boss.datas.pack_kava) {
+      const found = pack.lots_inside?.find(
+        (inside) =>
+          inside.volume === item.volume &&
+          inside.packsKavaId === item.packsKavaId
+      );
+    
+      if (found) {
+        targetInside = found;
+        break;
+      }
+    }
+    
+    // Если не найдено
+    if (!targetInside) {
+      return res.status(404).json({ message: 'Не знайдено відповідного lots_inside' });
+    }
+    
+// Якщо lots_price ще не існує або порожній — ініціалізуй
+if (!Array.isArray(targetInside.lots_price) || targetInside.lots_price.length === 0) {
+  targetInside.lots_price = [{}];
+}
+
+// Тепер безпечно перевіряємо кількість цін
+if (Object.keys(targetInside.lots_price[0]).length >= 3) {
+  return res.status(400).json({ message: 'Максимум 3 ціни дозволено' });
+}
+
+// Додаємо нову ціну
+targetInside.lots_price[0][newPrice] = Number(newValue);
+
+// Зберігаємо
+boss.markModified('datas.pack_kava');
+await boss.save();
+
+    
+    // Сохраняем босса
+    // await boss.save();
+    
+    res.json({ message: 'Ціну додано успішно', updated: targetInside });
+    
+
+  } catch (error) {
+    console.error('Помилка при збереженні фасування:', error);
+    res.status(500).json({ message: 'Внутрішня помилка сервера' });
+  }
+});
+
+///api/create_order
+app.post('/api/create_order', authMiddleware, async (req, res) => {
+  try {
+    const {client_type, total_price, order_items ,partner_info,client_info} = req.body;
+
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: 'Користувача не знайдено' });
+    
+    const boss = await User.findOne({ post: user.bossPost });
+    if (!boss) return res.status(404).json({ message: 'Боса не знайдено' });
+    
+    console.log(client_type  ,total_price,order_items )
+
+    // const datatoSave = {
+    //   order_items,
+    //   total_price,
+    //   client_info,
+    //   author:user.name,
+    //   date:new Date().toISOString(),
+    //   partner_info
+    // }
+
+    if (client_type == "client") {
+      const datatoSave = {
+        order_items,
+        total_price,
+        client_info,
+        author:user.name,
+        date:new Date().toISOString(),
+      }
+      boss.datas.orders.client.push(datatoSave)
+    }if (client_type == "partner") {
+
+      const datatoSave = {
+        order_items,
+        total_price,
+        partner_info,
+        author:user.name,
+        date:new Date().toISOString(),
+      }
+      boss.datas.orders.partner.push(datatoSave)
+    }if (client_type == "establishment"){
+      boss.datas.orders.establishment.push(datatoSave)
+    }
+
+
+    boss.markModified('datas.orders');
+await boss.save();
+
+
+    
+    // Сохраняем босса
+    // await boss.save();
+    
+    res.json({ message: `успішно`});
+    
+
+  } catch (error) {
+    console.error('Помилка при створення замовлення:', error);
+    res.status(500).json({ message: 'Внутрішня помилка сервера' });
+  }
+});
+
 // Запуск сервера
 // app.listen(5011 , '0.0.0.0', () => {
 //     console.log(`Server is running on port ${port}`);
 // });
+//get_client_orders
+app.get('/api/get_client_orders', authMiddleware, async (req, res) => {
+  try {
+      // Ищем текущего пользователя
+      const user = await User.findById(req.user.userId); // Мы не исключаем поля, чтобы получить все данные
+      if (!user) {
+          return res.status(404).json({ msg: 'Пользователь не найден' });
+      }
+
+
+      let boss = await User.findOne({post:user.bossPost})
+
+      if (!boss){
+          boss = await User.findOne({post:user.post})
+      }
+      
+      
+      
+      
+      
+      
+
+      const client_orders = boss.datas.orders.client;
+
+      console.log("Packs",client_orders)
+
+      res.json({
+        client_orders
+      });
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: 'Ошибка сервера' });
+  }
+});
+
+
+app.get('/api/get_partner_orders', authMiddleware, async (req, res) => {
+  try {
+      // Ищем текущего пользователя
+      const user = await User.findById(req.user.userId); // Мы не исключаем поля, чтобы получить все данные
+      if (!user) {
+          return res.status(404).json({ msg: 'Пользователь не найден' });
+      }
+
+
+      let boss = await User.findOne({post:user.bossPost})
+
+      if (!boss){
+          boss = await User.findOne({post:user.post})
+      }
+      
+      
+      
+      
+      
+      
+
+      const client_orders = boss.datas.orders.partner;
+
+      console.log("Packs",client_orders)
+
+      res.json({
+        client_orders
+      });
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: 'Ошибка сервера' });
+  }
+});
+
 
 app.listen(5011 , () => {
   console.log(`Server is running on port ${port}`);
 });
 
-
-// pack_kava:[
-//   {
-//     lotId:тут лод ид,
-//     globalRoastWeight : тут понятно 
-//     lotsInside;[
-//       {
-//         weight:вес
-//         stickerId:
-//         packid:
-//         stickerCount
-//         packCount
-//         createdAt 
-//         author 
-//       }
-//     ]
-//   }
-// ]
-
-// юзер:{
-//   номер_телефона:3800000000
-//   игры:[
-//     {
-//       игра1:проигрыш / промокод,
-//       игра2:5 / промокод ,
-//       игра3:под_системы / промокод,
-//       выбранная:игра1
-//     },
-//     {
-//       игра1:проигрыш / промокод,
-//       игра2:5 / промокод ,
-//       игра3:под_системы / промокод,
-//       выбранная:игра1
-//     },
-//     {
-//       игра1:проигрыш / промокод,
-//       игра2:5 / промокод ,
-//       игра3:под_системы / промокод,
-//       выбранная:игра1
-//     },  
-//   ]
-
-
-// }

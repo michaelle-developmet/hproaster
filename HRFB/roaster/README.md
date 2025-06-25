@@ -78,3 +78,14 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 
 
 
+
+
+
+имя 
+номер телефона
+стоимость заказа
+корзина заказа
+адрес
+
+автор
+дата 

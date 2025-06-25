@@ -140,7 +140,27 @@ onMounted(() => {
                     </MenubarItem>
                 </MenubarContent>
                 </MenubarMenu>
+                <MenubarMenu>
+                <MenubarTrigger>Додаткові поставки</MenubarTrigger>
+                <MenubarContent>
+                    <MenubarItem>
+                        
+
+
+                        <AccessLink
+                                :to="'/addition'"
+                                label="Робоча"
+                                :access="getAccessLevel('addition.work')"
+                            />
+                        
+                    </MenubarItem>
+                    <MenubarItem>
+                            Склад
+                    </MenubarItem>
+                </MenubarContent>
                 
+                </MenubarMenu>
+
                 <MenubarMenu>
                 <MenubarTrigger>Зелена кава</MenubarTrigger>
                 <MenubarContent>
@@ -231,27 +251,54 @@ onMounted(() => {
                 
                 </MenubarMenu>
 
+
+
+
                 <MenubarMenu>
-                <MenubarTrigger>Додаткові поставки</MenubarTrigger>
+                <MenubarTrigger>Вартість</MenubarTrigger>
                 <MenubarContent>
-                    <MenubarItem>
+
                         
 
 
-                        <AccessLink
-                                :to="'/addition'"
-                                label="Робоча"
-                                :access="getAccessLevel('addition.work')"
-                            />
-                        
+                      <MenubarItem>
+                            <nuxt-link to="/priceset">Робоча</nuxt-link>
                     </MenubarItem>
+                        
                     <MenubarItem>
-                            Склад
+                            Огляд
                     </MenubarItem>
                 </MenubarContent>
                 
                 </MenubarMenu>
 
+
+                <MenubarMenu>
+                <MenubarTrigger>Поставки</MenubarTrigger>
+                <MenubarContent>
+                    <MenubarItem>
+                        
+
+
+  
+                            <nuxt-link to="/sends">Робоча</nuxt-link>
+                        
+                    </MenubarItem>
+                    <MenubarItem>
+                            
+                            <nuxt-link to="/client_orders">Клієнти</nuxt-link>
+                    </MenubarItem>
+                    <MenubarItem>
+                            
+                            <nuxt-link to="/partners_orders">Партнери</nuxt-link>
+                    </MenubarItem>
+                    <MenubarItem>
+                            
+                            <nuxt-link to="/establishment_orders">Заклади</nuxt-link>
+                    </MenubarItem>
+                </MenubarContent>
+                
+                </MenubarMenu>
 
             </Menubar>
         </div>

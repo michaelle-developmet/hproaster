@@ -1,14 +1,17 @@
+version: "3.8"
+
 services:
-  back:
+  frontend:
+    build:
+      context: ./HRFB/roaster
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SERVER_URL=http://backend:5011
+
+  backend:
     build:
       context: ./roasrserver
-      dockerfile: ./Dockerfile
     ports:
-        - "5011:5011"
-
-  front:
-      build:
-        context: ./HRFB/roaster
-        dockerfile: ./Dockerfile
-      ports:
-        - "3000:3000"  
+      - "5011:5011"

@@ -1,17 +1,15 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2024-11-01',
-  devtools: { enabled: true },
+  ssr: true,
+
+  runtimeConfig: {
+    public: {
+      serverUrl: process.env.SERVER_URL || 'http://localhost:5011'
+    }
+  },
+
   modules: ['@nuxt/image', '@nuxtjs/tailwindcss', 'shadcn-nuxt'],
   shadcn: {
-    /**
-     * Prefix for all the imported component
-     */
     prefix: '',
-    /**
-     * Directory that the component lives in.
-     * @default "./components/ui"
-     */
     componentDir: './components/ui'
   }
 })

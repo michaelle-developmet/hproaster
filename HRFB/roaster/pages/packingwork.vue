@@ -190,11 +190,13 @@ const sendPackingData = async () => {
   <label v-if="selectedLotId">
     Оберіть обʼєм:
     <input
+      class="uniq_input"
       type="number"
       v-model.number="selectedVolume"
       :max="maxVolume"
       min="0.1"
       step="0.1"
+      
     />
     <span v-if="selectedVolume > maxVolume" style="color: red;">
       Обʼєм перевищує доступний!
@@ -305,7 +307,7 @@ const sendPackingData = async () => {
 
     .container{
         width: 80vw;
-        height: 65vh;
+        height: 70vh;
         margin-top: 2vh;
         transition: transform 0.5s ease-in-out; /* Плавная анимация */
         background: rgba(12, 12, 12, 0.332);
@@ -347,9 +349,17 @@ margin-top: 10px;
   }
 
   .packing_order > input{
-margin-top: 10px;
-background: rgba(12, 12, 12, 0.332);
-padding:10px;
+    margin-top: 10px;
+    background: rgba(12, 12, 12, 0.332);
+    padding:10px;
+  }
+
+  .uniq_input{
+    /* margin-top: 10px; */
+    background: rgba(12, 12, 12, 0.332);
+    padding:10px;
+    border-radius: 15px;
+    width: 160px;
   }
 
   .packing_order > select{

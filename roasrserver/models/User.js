@@ -108,7 +108,11 @@ const UserSchema = new mongoose.Schema({
 
             default: [],
           },
-
+          orders:{
+            client:{type:Array},
+            partner:{type:Array},
+            establishment:{type:Array}
+          },
 
 },
     bossPost: { type: String }, // Email босса
