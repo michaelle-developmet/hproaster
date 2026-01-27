@@ -42,7 +42,12 @@ const corsOptions = {
 };
 
 
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: true, // Разрешает любой домен, с которого пришел запрос
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'] // Добавили заголовков
+}));
 app.use(express.json());
 app.use(cookieParser());
 // Увеличиваем лимит для JSON и URL-encoded данных
